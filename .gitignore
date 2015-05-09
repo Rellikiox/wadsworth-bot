@@ -1,2 +1,3 @@
 *.shelve
-settings.yaml
+config.yaml
+*.pyc
