@@ -12,6 +12,7 @@ def cached(fn):
     def wrapped(self, submission):
         id = str(submission.id)
         if id in self.cache:
+            print '*'
             return self.cache[id]
         else:
             result = fn(self, submission)

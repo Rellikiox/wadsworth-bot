@@ -7,10 +7,11 @@ import utils
 
 
 CONFIG = yaml.load(open('config.yaml'))
-
 USER_AGENT = ('PyWadsworth Bot 0.1')
-
 VIDEO_URL = 'https://www.youtube.com/watch?v={video_id}&t={seconds}s'
+LIMIT = 15
+SUBREDDIT = 'bottesting'
+CACHE_FILENAME = 'videos_posted.shelve'
 
 
 class WadsworthBot(object):
@@ -19,11 +20,12 @@ class WadsworthBot(object):
         self.r.login(CONFIG['reddit']['username'], CONFIG['reddit']['password'])
 
     def run(self):
-        self.cache = shelve.open('videos_posted.shelve')
+        """Runs the bot"""
+        self.cache = shelve.open(CACHE_FILENAME)
 
-        subreddit = self.r.get_subreddit('bottesting')
+        subreddit = self.r.get_subreddit(SUBREDDIT)
 
-        for submission in subreddit.get_new(limit=16):
+        for submission in subreddit.get_new(limit=LIMIT):
             new_url = self.process_submission(submission)
             print '{} -> {}'.format(submission.id, new_url)
 
@@ -31,10 +33,14 @@ class WadsworthBot(object):
 
     @utils.cached
     def process_submission(self, submission):
+        """Processes a reddit post
+
+        First it checks that the post is a link to youtube, calculates the wadsworth time
+        and posts a comment in the post with a new link to the video"""
         if self.submission_is_youtube(submission):
             time = self.get_wadsworth_time(submission.url)
             new_video_url = self.get_new_url(submission.url, time)
-            # self.post_comment(submission, new_video_url)
+            self.post_comment(submission, new_video_url)
             return new_video_url
 
     def submission_is_youtube(self, submission):
